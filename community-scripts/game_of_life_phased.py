@@ -9,6 +9,36 @@
 #### IMPORTS ####
 import random
 
+#### UNIT TEST FUNCTION ####
+alive_mid_vert = [(0,9), (0,10), (0,11), (7,9), (7,10), (7,11)]
+num_alive_tests = [
+        # { alive_cells:[(x,y)...], x:int, y:int, wrap: bool, expect: int}
+        { "alive_cells": alive_mid_vert, "x":7, "y":8, "wrap":False, "expect":1 },
+        { "alive_cells": alive_mid_vert, "x":7, "y":9, "wrap":False, "expect":1 },
+        { "alive_cells": alive_mid_vert, "x":7, "y":10, "wrap":False, "expect":2 },
+        { "alive_cells": alive_mid_vert, "x":7, "y":11, "wrap":False, "expect":1 },
+        { "alive_cells": alive_mid_vert, "x":7, "y":12, "wrap":False, "expect":1 },
+        { "alive_cells": alive_mid_vert, "x":0, "y":8, "wrap":False, "expect":1 },
+        { "alive_cells": alive_mid_vert, "x":0, "y":9, "wrap":False, "expect":1 },
+        { "alive_cells": alive_mid_vert, "x":0, "y":10, "wrap":False, "expect":2 },
+        { "alive_cells": alive_mid_vert, "x":0, "y":11, "wrap":False, "expect":1 },
+        { "alive_cells": alive_mid_vert, "x":0, "y":12, "wrap":False, "expect":1 },
+        { "alive_cells": [(0,9), (0,10), (0,11), (7,9), (7,10), (7,11)], "x":7, "y":9, "wrap":True, "expect":3 }
+        ]
+
+def test_num_alive_neighbours ():
+    global alive_cells
+    global wrapu
+    #loop through a bunch of tests
+    for test in num_alive_tests:
+        alive_cells = test[ "alive_cells"]
+        wrap = test[ "wrap"]
+        count = num_alive_neighbours (test[ "x"], test[ "y"])
+        #report if returned value not what was expected
+        if count != test[ "expect"]:
+            #print ("Test failed, got %s, with %s" % ( count, "x:" + test) )
+            print ("Test failed, got %s, expected %s with x:%s y:%s wrap:%s" % ( count, test["expect"],  test["x"], test["y"], test["wrap"] ))
+
 #### FUNCTIONS ####
 
 # determine the number of alive neighbors
@@ -46,6 +76,7 @@ allowed_loops = 3
 maximum_generations = 500
 base_saturation = 1
 base_luminance = 0.5
+wrap = False
 
 
 #### CONSTANTS ####
@@ -58,6 +89,7 @@ spark = dead + 1
 
 #### MAIN LOOP ####
 # VARIABLES
+test_num_alive_neighbours () # run unit tests first
 base_hue = 0
 num_generations = 0
 num_cells_start = 0
@@ -162,3 +194,4 @@ while True:
         if fail_safe_count <= 0:
             print ("Fail safe triggered")
             is_looping = True
+
