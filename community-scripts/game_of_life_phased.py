@@ -1,4 +1,4 @@
-i# Run Conway's Game of Life (https://en.wikipedia.org/wiki/Conway's_Game_of_Life)
+# Run Conway's Game of Life (https://en.wikipedia.org/wiki/Conway's_Game_of_Life)
 # based on the AbstractFoundry code
 # modified by Kirk Carlson
 #   phased transitions between generations
@@ -127,18 +127,6 @@ num_alive_tests = [
         { "alive_cells": alive_right_hor, "x":0,  "y":11, "wrap":True, "expect":2 },
         { "alive_cells": alive_right_hor, "x":0,  "y":12, "wrap":True, "expect":1 },
 
-#alive_left_ne = [(7,7)]
-#alive_left_se = [(7,0)]
-#alive_left_sw = [(0,0)]
-#alive_left_nw = [(0,7)]
-#alive_right_ne = [(15,7)]
-#alive_right_se = [(15,0)]
-#alive_right_sw = [(8,0)]
-#alive_right_nw = [(8,7)]
-#alive_top_ne = [(7,15)]
-#alive_top_se = [(7,7)]
-#alive_top_sw = [(0,7)]
-#alive_top_nw = [(0,15)]
         { "alive_cells": alive_left_ne, "x":0,  "y":0,  "wrap":False, "expect":0 },
         { "alive_cells": alive_left_ne, "x":0,  "y":7,  "wrap":False, "expect":0 },
         { "alive_cells": alive_left_ne, "x":0,  "y":8,  "wrap":False, "expect":0 },
@@ -515,8 +503,26 @@ def is_list_equal( list1, list2):
     return True
 
 
+# generate string representing a state of alive cells
+def alive_to_str(alives):
+    string = ""
+    sum = 0
+    for y in range (16):
+        row = 0
+        for x in range (16):
+            if x<8 or y<8:
+                if (x, y) in alives:
+                    row |= 1 << x
+        if y<8:
+            string += "%04X-" % row
+        else:
+            string += "%02X-" % row
+        sum += (row & 0xFF) + ((row >>8) & 0xFF) # sum over bytes
+    string += "%02X" % (-sum & 0xFF)
+    return string
 
-#### CONFIGURATION CONSTANTS ####
+#### CONFIGURATION CONSTANTS ####            string += "%04X-" % row
+
 starting_live_ratio = 0.4
 guard_hue = 0.1 # portion of full circle
 allowed_loops = 3
@@ -574,6 +580,7 @@ while True:
                 column.append( dead)
         current_phases.append( column)
     num_cells_start = len( alive_cells)
+    print ("seed: %s"% alive_to_str( alive_cells))
 
     num_generations = 0
     past_alives = []
@@ -607,6 +614,7 @@ while True:
                     loop_count += 1
                     if loop_count >= allowed_loops:
                         is_looping = True # now we've seen enough
+                        print ("end: %s"% alive_to_str( alive_cells))
         if len( past_alives) == 0 or past_loop_length == 0: # first pass or no loop detected
             past_alives.append( alive_cells)
             num_generations += 1
