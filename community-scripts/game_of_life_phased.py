@@ -1,4 +1,4 @@
-# Run Conway's Game of Life (https://en.wikipedia.org/wiki/Conway's_Game_of_Life)
+i# Run Conway's Game of Life (https://en.wikipedia.org/wiki/Conway's_Game_of_Life)
 # based on the AbstractFoundry code
 # modified by Kirk Carlson
 #   phased transitions between generations
@@ -10,51 +10,498 @@
 import random
 
 #### UNIT TEST FUNCTION ####
-alive_mid_vert = [(0,9), (0,10), (0,11), (7,9), (7,10), (7,11)]
+alive_top_vert = [(0,9), (0,10), (0,11), (7,9), (7,10), (7,11)]
+alive_left_vert = [(0,1), (0,2), (0,3), (7,1), (7,2), (7,3)]
+alive_right_hor = [(9,0), (10,0), (11,0), (9,7), (10,7), (11,7)]
+alive_left_ne = [(7,7)]
+alive_left_se = [(7,0)]
+alive_left_sw = [(0,0)]
+alive_left_nw = [(0,7)]
+alive_right_ne = [(15,7)]
+alive_right_se = [(15,0)]
+alive_right_sw = [(8,0)]
+alive_right_nw = [(8,7)]
+alive_top_ne = [(7,15)]
+alive_top_se = [(7,8)]
+alive_top_sw = [(0,8)]
+alive_top_nw = [(0,15)]
 num_alive_tests = [
         # { alive_cells:[(x,y)...], x:int, y:int, wrap: bool, expect: int}
-        { "alive_cells": alive_mid_vert, "x":7, "y":8, "wrap":False, "expect":1 },
-        { "alive_cells": alive_mid_vert, "x":7, "y":9, "wrap":False, "expect":1 },
-        { "alive_cells": alive_mid_vert, "x":7, "y":10, "wrap":False, "expect":2 },
-        { "alive_cells": alive_mid_vert, "x":7, "y":11, "wrap":False, "expect":1 },
-        { "alive_cells": alive_mid_vert, "x":7, "y":12, "wrap":False, "expect":1 },
-        { "alive_cells": alive_mid_vert, "x":0, "y":8, "wrap":False, "expect":1 },
-        { "alive_cells": alive_mid_vert, "x":0, "y":9, "wrap":False, "expect":1 },
-        { "alive_cells": alive_mid_vert, "x":0, "y":10, "wrap":False, "expect":2 },
-        { "alive_cells": alive_mid_vert, "x":0, "y":11, "wrap":False, "expect":1 },
-        { "alive_cells": alive_mid_vert, "x":0, "y":12, "wrap":False, "expect":1 },
-        { "alive_cells": [(0,9), (0,10), (0,11), (7,9), (7,10), (7,11)], "x":7, "y":9, "wrap":True, "expect":3 }
+        { "alive_cells": alive_top_vert, "x":7, "y":8,  "wrap":False, "expect":1 },
+        { "alive_cells": alive_top_vert, "x":7, "y":9,  "wrap":False, "expect":1 },
+        { "alive_cells": alive_top_vert, "x":7, "y":10, "wrap":False, "expect":2 },
+        { "alive_cells": alive_top_vert, "x":7, "y":11, "wrap":False, "expect":1 },
+        { "alive_cells": alive_top_vert, "x":7, "y":12, "wrap":False, "expect":1 },
+        { "alive_cells": alive_top_vert, "x":0, "y":8,  "wrap":False, "expect":1 },
+        { "alive_cells": alive_top_vert, "x":0, "y":9,  "wrap":False, "expect":1 },
+        { "alive_cells": alive_top_vert, "x":0, "y":10, "wrap":False, "expect":2 },
+        { "alive_cells": alive_top_vert, "x":0, "y":11, "wrap":False, "expect":1 },
+        { "alive_cells": alive_top_vert, "x":0, "y":12, "wrap":False, "expect":1 },
+
+        { "alive_cells": alive_top_vert, "x":7, "y":8,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_top_vert, "x":7, "y":9,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_top_vert, "x":7, "y":10, "wrap":True, "expect":2 },
+        { "alive_cells": alive_top_vert, "x":7, "y":11, "wrap":True, "expect":1 },
+        { "alive_cells": alive_top_vert, "x":7, "y":12, "wrap":True, "expect":1 },
+        { "alive_cells": alive_top_vert, "x":0, "y":8,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_top_vert, "x":0, "y":9,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_top_vert, "x":0, "y":10, "wrap":True, "expect":2 },
+        { "alive_cells": alive_top_vert, "x":0, "y":11, "wrap":True, "expect":1 },
+        { "alive_cells": alive_top_vert, "x":0, "y":12, "wrap":True, "expect":1 },
+
+        { "alive_cells": alive_top_vert, "x":8,  "y":7, "wrap":True, "expect":1 },
+        { "alive_cells": alive_top_vert, "x":9,  "y":7, "wrap":True, "expect":2 },
+        { "alive_cells": alive_top_vert, "x":10, "y":7, "wrap":True, "expect":3 },
+        { "alive_cells": alive_top_vert, "x":11, "y":7, "wrap":True, "expect":2 },
+        { "alive_cells": alive_top_vert, "x":12, "y":7, "wrap":True, "expect":1 },
+        { "alive_cells": alive_top_vert, "x":8,  "y":0, "wrap":True, "expect":1 },
+        { "alive_cells": alive_top_vert, "x":9,  "y":0, "wrap":True, "expect":2 },
+        { "alive_cells": alive_top_vert, "x":10, "y":0, "wrap":True, "expect":3 },
+        { "alive_cells": alive_top_vert, "x":11, "y":0, "wrap":True, "expect":2 },
+        { "alive_cells": alive_top_vert, "x":12, "y":0, "wrap":True, "expect":1 },
+
+        { "alive_cells": alive_left_vert, "x":7, "y":0, "wrap":False, "expect":1 },
+        { "alive_cells": alive_left_vert, "x":7, "y":1, "wrap":False, "expect":1 },
+        { "alive_cells": alive_left_vert, "x":7, "y":2, "wrap":False, "expect":2 },
+        { "alive_cells": alive_left_vert, "x":7, "y":3, "wrap":False, "expect":1 },
+        { "alive_cells": alive_left_vert, "x":7, "y":4, "wrap":False, "expect":1 },
+        { "alive_cells": alive_left_vert, "x":0, "y":0, "wrap":False, "expect":1 },
+        { "alive_cells": alive_left_vert, "x":0, "y":1, "wrap":False, "expect":1 },
+        { "alive_cells": alive_left_vert, "x":0, "y":2, "wrap":False, "expect":2 },
+        { "alive_cells": alive_left_vert, "x":0, "y":3, "wrap":False, "expect":1 },
+        { "alive_cells": alive_left_vert, "x":0, "y":4, "wrap":False, "expect":1 },
+
+        { "alive_cells": alive_left_vert, "x":7, "y":0, "wrap":True, "expect":1 },
+        { "alive_cells": alive_left_vert, "x":7, "y":1, "wrap":True, "expect":1 },
+        { "alive_cells": alive_left_vert, "x":7, "y":2, "wrap":True, "expect":2 },
+        { "alive_cells": alive_left_vert, "x":7, "y":3, "wrap":True, "expect":1 },
+        { "alive_cells": alive_left_vert, "x":7, "y":4, "wrap":True, "expect":1 },
+        { "alive_cells": alive_left_vert, "x":0, "y":0, "wrap":True, "expect":1 },
+        { "alive_cells": alive_left_vert, "x":0, "y":1, "wrap":True, "expect":1 },
+        { "alive_cells": alive_left_vert, "x":0, "y":2, "wrap":True, "expect":2 },
+        { "alive_cells": alive_left_vert, "x":0, "y":3, "wrap":True, "expect":1 },
+        { "alive_cells": alive_left_vert, "x":0, "y":4, "wrap":True, "expect":1 },
+
+        { "alive_cells": alive_left_vert, "x":8,  "y":0, "wrap":True, "expect":1 },
+        { "alive_cells": alive_left_vert, "x":8,  "y":1, "wrap":True, "expect":2 },
+        { "alive_cells": alive_left_vert, "x":8,  "y":2, "wrap":True, "expect":3 },
+        { "alive_cells": alive_left_vert, "x":8,  "y":3, "wrap":True, "expect":2 },
+        { "alive_cells": alive_left_vert, "x":8,  "y":4, "wrap":True, "expect":1 },
+        { "alive_cells": alive_left_vert, "x":15, "y":0, "wrap":True, "expect":1 },
+        { "alive_cells": alive_left_vert, "x":15, "y":1, "wrap":True, "expect":2 },
+        { "alive_cells": alive_left_vert, "x":15, "y":2, "wrap":True, "expect":3 },
+        { "alive_cells": alive_left_vert, "x":15, "y":3, "wrap":True, "expect":2 },
+        { "alive_cells": alive_left_vert, "x":15, "y":4, "wrap":True, "expect":1 },
+
+
+        { "alive_cells": alive_right_hor, "x":8,  "y":0, "wrap":False, "expect":1 },
+        { "alive_cells": alive_right_hor, "x":9,  "y":0, "wrap":False, "expect":1 },
+        { "alive_cells": alive_right_hor, "x":10, "y":0, "wrap":False, "expect":2 },
+        { "alive_cells": alive_right_hor, "x":11, "y":0, "wrap":False, "expect":1 },
+        { "alive_cells": alive_right_hor, "x":12, "y":0, "wrap":False, "expect":1 },
+        { "alive_cells": alive_right_hor, "x":8,  "y":7, "wrap":False, "expect":1 },
+        { "alive_cells": alive_right_hor, "x":9,  "y":7, "wrap":False, "expect":1 },
+        { "alive_cells": alive_right_hor, "x":10, "y":7, "wrap":False, "expect":2 },
+        { "alive_cells": alive_right_hor, "x":11, "y":7, "wrap":False, "expect":1 },
+        { "alive_cells": alive_right_hor, "x":12, "y":7, "wrap":False, "expect":1 },
+
+        { "alive_cells": alive_right_hor, "x":8,  "y":0, "wrap":True, "expect":1 },
+        { "alive_cells": alive_right_hor, "x":9,  "y":0, "wrap":True, "expect":1 },
+        { "alive_cells": alive_right_hor, "x":10, "y":0, "wrap":True, "expect":2 },
+        { "alive_cells": alive_right_hor, "x":11, "y":0, "wrap":True, "expect":1 },
+        { "alive_cells": alive_right_hor, "x":12, "y":0, "wrap":True, "expect":1 },
+        { "alive_cells": alive_right_hor, "x":8,  "y":7, "wrap":True, "expect":1 },
+        { "alive_cells": alive_right_hor, "x":9,  "y":7, "wrap":True, "expect":1 },
+        { "alive_cells": alive_right_hor, "x":10, "y":7, "wrap":True, "expect":2 },
+        { "alive_cells": alive_right_hor, "x":11, "y":7, "wrap":True, "expect":1 },
+        { "alive_cells": alive_right_hor, "x":12, "y":7, "wrap":True, "expect":1 },
+
+        { "alive_cells": alive_right_hor, "x":7,  "y":8,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_right_hor, "x":7,  "y":9,  "wrap":True, "expect":2 },
+        { "alive_cells": alive_right_hor, "x":7,  "y":10, "wrap":True, "expect":3 },
+        { "alive_cells": alive_right_hor, "x":7,  "y":11, "wrap":True, "expect":2 },
+        { "alive_cells": alive_right_hor, "x":7,  "y":12, "wrap":True, "expect":1 },
+        { "alive_cells": alive_right_hor, "x":0,  "y":8,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_right_hor, "x":0,  "y":9,  "wrap":True, "expect":2 },
+        { "alive_cells": alive_right_hor, "x":0,  "y":10, "wrap":True, "expect":3 },
+        { "alive_cells": alive_right_hor, "x":0,  "y":11, "wrap":True, "expect":2 },
+        { "alive_cells": alive_right_hor, "x":0,  "y":12, "wrap":True, "expect":1 },
+
+#alive_left_ne = [(7,7)]
+#alive_left_se = [(7,0)]
+#alive_left_sw = [(0,0)]
+#alive_left_nw = [(0,7)]
+#alive_right_ne = [(15,7)]
+#alive_right_se = [(15,0)]
+#alive_right_sw = [(8,0)]
+#alive_right_nw = [(8,7)]
+#alive_top_ne = [(7,15)]
+#alive_top_se = [(7,7)]
+#alive_top_sw = [(0,7)]
+#alive_top_nw = [(0,15)]
+        { "alive_cells": alive_left_ne, "x":0,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_ne, "x":0,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_ne, "x":0,  "y":8,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_ne, "x":0,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_ne, "x":7,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_ne, "x":7,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_ne, "x":7,  "y":8,  "wrap":False, "expect":1 },
+        { "alive_cells": alive_left_ne, "x":7,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_ne, "x":8,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_ne, "x":8,  "y":7,  "wrap":False, "expect":1 },
+        { "alive_cells": alive_left_ne, "x":15, "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_ne, "x":15, "y":7,  "wrap":False, "expect":0 },
+
+        { "alive_cells": alive_left_ne, "x":0,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_ne, "x":0,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_ne, "x":0,  "y":8,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_ne, "x":0,  "y":15, "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_ne, "x":7,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_ne, "x":7,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_ne, "x":7,  "y":8,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_left_ne, "x":7,  "y":15, "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_ne, "x":8,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_ne, "x":8,  "y":7,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_left_ne, "x":15, "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_ne, "x":15, "y":7,  "wrap":True, "expect":0 },
+
+        { "alive_cells": alive_left_se, "x":0,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_se, "x":0,  "y":8,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_se, "x":0,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_se, "x":7,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_se, "x":7,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_se, "x":7,  "y":8,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_se, "x":7,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_se, "x":8,  "y":0,  "wrap":False, "expect":1 },
+        { "alive_cells": alive_left_se, "x":8,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_se, "x":15, "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_se, "x":15, "y":7,  "wrap":False, "expect":0 },
+
+        { "alive_cells": alive_left_se, "x":0,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_se, "x":0,  "y":8,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_se, "x":0,  "y":15, "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_se, "x":7,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_se, "x":7,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_se, "x":7,  "y":8,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_se, "x":7,  "y":15, "wrap":True, "expect":1 },
+        { "alive_cells": alive_left_se, "x":8,  "y":0,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_left_se, "x":8,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_se, "x":15, "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_se, "x":15, "y":7,  "wrap":True, "expect":0 },
+
+        { "alive_cells": alive_left_sw, "x":0,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_sw, "x":0,  "y":8,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_sw, "x":0,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_sw, "x":7,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_sw, "x":7,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_sw, "x":7,  "y":8,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_sw, "x":7,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_sw, "x":8,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_sw, "x":8,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_sw, "x":15, "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_sw, "x":15, "y":7,  "wrap":False, "expect":0 },
+
+        { "alive_cells": alive_left_sw, "x":0,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_sw, "x":0,  "y":8,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_sw, "x":0,  "y":15, "wrap":True, "expect":1 },
+        { "alive_cells": alive_left_sw, "x":7,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_sw, "x":7,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_sw, "x":7,  "y":8,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_sw, "x":7,  "y":15, "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_sw, "x":8,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_sw, "x":8,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_sw, "x":15, "y":0,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_left_sw, "x":15, "y":7,  "wrap":True, "expect":0 },
+
+        { "alive_cells": alive_left_nw, "x":0,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_nw, "x":0,  "y":8,  "wrap":False, "expect":1 },
+        { "alive_cells": alive_left_nw, "x":0,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_nw, "x":7,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_nw, "x":7,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_nw, "x":7,  "y":8,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_nw, "x":7,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_nw, "x":8,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_nw, "x":8,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_nw, "x":15, "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_left_sw, "x":15, "y":7,  "wrap":False, "expect":0 },
+
+        { "alive_cells": alive_left_nw, "x":0,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_nw, "x":0,  "y":8,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_left_nw, "x":0,  "y":15, "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_nw, "x":7,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_nw, "x":7,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_nw, "x":7,  "y":8,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_nw, "x":7,  "y":15, "wrap":True, "expect":0 }, #175
+        { "alive_cells": alive_left_nw, "x":8,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_nw, "x":8,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_nw, "x":15, "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_left_nw, "x":15, "y":7,  "wrap":True, "expect":1 },
+
+        { "alive_cells": alive_right_ne, "x":0,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_ne, "x":0,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_ne, "x":0,  "y":8,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_ne, "x":0,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_ne, "x":7,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_ne, "x":7,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_ne, "x":7,  "y":8,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_ne, "x":7,  "y":15, "wrap":False, "expect":1 }, #187
+        { "alive_cells": alive_right_ne, "x":8,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_ne, "x":8,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_ne, "x":15, "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_ne, "x":15, "y":7,  "wrap":False, "expect":0 },
+
+        { "alive_cells": alive_right_ne, "x":0,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_ne, "x":0,  "y":7,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_right_ne, "x":0,  "y":8,  "wrap":True, "expect":1 }, #194
+        { "alive_cells": alive_right_ne, "x":0,  "y":15, "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_ne, "x":7,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_ne, "x":7,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_ne, "x":7,  "y":8,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_ne, "x":7,  "y":15, "wrap":True, "expect":1 }, #199
+        { "alive_cells": alive_right_ne, "x":8,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_ne, "x":8,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_ne, "x":15, "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_ne, "x":15, "y":7,  "wrap":True, "expect":0 },
+
+        { "alive_cells": alive_right_se, "x":0,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_se, "x":0,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_se, "x":0,  "y":8,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_se, "x":0,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_se, "x":7,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_se, "x":7,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_se, "x":7,  "y":8,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_se, "x":7,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_se, "x":8,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_se, "x":8,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_se, "x":15, "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_se, "x":15, "y":7,  "wrap":False, "expect":0 },
+
+        { "alive_cells": alive_right_se, "x":0,  "y":0,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_right_se, "x":0,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_se, "x":0,  "y":8,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_se, "x":0,  "y":15, "wrap":True, "expect":1 },
+        { "alive_cells": alive_right_se, "x":7,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_se, "x":7,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_se, "x":7,  "y":8,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_se, "x":7,  "y":15, "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_se, "x":8,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_se, "x":8,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_se, "x":15, "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_se, "x":15, "y":7,  "wrap":True, "expect":0 },
+
+        { "alive_cells": alive_right_sw, "x":0,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_sw, "x":0,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_sw, "x":0,  "y":8,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_sw, "x":0,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_sw, "x":7,  "y":0,  "wrap":False, "expect":1 },
+        { "alive_cells": alive_right_sw, "x":7,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_sw, "x":7,  "y":8,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_sw, "x":7,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_sw, "x":8,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_sw, "x":8,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_sw, "x":15, "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_sw, "x":15, "y":7,  "wrap":False, "expect":0 },
+
+        { "alive_cells": alive_right_sw, "x":0,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_sw, "x":0,  "y":7,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_right_sw, "x":0,  "y":8,  "wrap":True, "expect":1 }, #242
+        { "alive_cells": alive_right_sw, "x":0,  "y":15, "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_sw, "x":7,  "y":0,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_right_sw, "x":7,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_sw, "x":7,  "y":8,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_sw, "x":7,  "y":15, "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_sw, "x":8,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_sw, "x":8,  "y":7,  "wrap":True, "expect":0 },
+
+        { "alive_cells": alive_right_nw, "x":0,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_nw, "x":0,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_nw, "x":0,  "y":8,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_nw, "x":0,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_nw, "x":7,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_nw, "x":7,  "y":7,  "wrap":False, "expect":1 }, #255
+        { "alive_cells": alive_right_nw, "x":7,  "y":8,  "wrap":False, "expect":1 }, #256
+        { "alive_cells": alive_right_nw, "x":7,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_nw, "x":8,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_nw, "x":8,  "y":7,  "wrap":False, "expect":0 }, #259
+        { "alive_cells": alive_right_nw, "x":15, "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_right_nw, "x":15, "y":7,  "wrap":False, "expect":0 },
+
+        { "alive_cells": alive_right_nw, "x":0,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_nw, "x":0,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_nw, "x":0,  "y":8,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_nw, "x":0,  "y":15, "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_nw, "x":7,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_nw, "x":7,  "y":7,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_right_nw, "x":7,  "y":8,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_right_nw, "x":7,  "y":15, "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_nw, "x":8,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_nw, "x":8,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_nw, "x":15, "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_right_nw, "x":15, "y":7,  "wrap":True, "expect":0 },
+
+        { "alive_cells": alive_top_ne, "x":0,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_ne, "x":0,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_ne, "x":0,  "y":8,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_ne, "x":0,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_ne, "x":7,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_ne, "x":7,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_ne, "x":7,  "y":8,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_ne, "x":7,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_ne, "x":8,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_ne, "x":8,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_ne, "x":15, "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_ne, "x":15, "y":7,  "wrap":False, "expect":1 },
+
+        { "alive_cells": alive_top_ne, "x":0,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_ne, "x":0,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_ne, "x":0,  "y":8,  "wrap":True, "expect":0 }, #288
+        { "alive_cells": alive_top_ne, "x":0,  "y":15, "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_ne, "x":7,  "y":0,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_top_ne, "x":7,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_ne, "x":7,  "y":8,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_ne, "x":7,  "y":15, "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_ne, "x":8,  "y":0,  "wrap":True, "expect":1 }, #294
+        { "alive_cells": alive_top_ne, "x":8,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_ne, "x":15, "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_ne, "x":15, "y":7,  "wrap":True, "expect":1 },
+
+        { "alive_cells": alive_top_se, "x":0,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_se, "x":0,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_se, "x":0,  "y":8,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_se, "x":0,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_se, "x":7,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_se, "x":7,  "y":7,  "wrap":False, "expect":1 }, #303
+        { "alive_cells": alive_top_se, "x":7,  "y":8,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_se, "x":7,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_se, "x":8,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_se, "x":8,  "y":7,  "wrap":False, "expect":1 },
+        { "alive_cells": alive_top_se, "x":15, "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_se, "x":15, "y":7,  "wrap":False, "expect":0 },
+
+        { "alive_cells": alive_top_se, "x":0,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_se, "x":0,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_se, "x":0,  "y":8,  "wrap":True, "expect":0 }, #312
+        { "alive_cells": alive_top_se, "x":0,  "y":15, "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_se, "x":7,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_se, "x":7,  "y":7,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_top_se, "x":7,  "y":8,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_se, "x":7,  "y":15, "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_se, "x":8,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_se, "x":8,  "y":7,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_top_se, "x":15, "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_se, "x":15, "y":7,  "wrap":True, "expect":0 },
+
+        { "alive_cells": alive_top_sw, "x":0,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_sw, "x":0,  "y":7,  "wrap":False, "expect":1 },
+        { "alive_cells": alive_top_sw, "x":0,  "y":8,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_sw, "x":0,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_sw, "x":7,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_sw, "x":7,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_sw, "x":7,  "y":8,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_sw, "x":7,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_sw, "x":8,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_sw, "x":8,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_sw, "x":15, "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_sw, "x":15, "y":7,  "wrap":False, "expect":0 },
+
+        { "alive_cells": alive_top_sw, "x":0,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_sw, "x":0,  "y":7,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_top_sw, "x":0,  "y":8,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_sw, "x":0,  "y":15, "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_sw, "x":7,  "y":0,  "wrap":True, "expect":1 }, #338
+        { "alive_cells": alive_top_sw, "x":7,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_sw, "x":7,  "y":8,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_sw, "x":7,  "y":15, "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_sw, "x":8,  "y":0,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_top_sw, "x":8,  "y":7,  "wrap":True, "expect":0 },
+
+        { "alive_cells": alive_top_nw, "x":0,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_nw, "x":0,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_nw, "x":0,  "y":8,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_nw, "x":0,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_nw, "x":7,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_nw, "x":7,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_nw, "x":7,  "y":8,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_nw, "x":7,  "y":15, "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_nw, "x":8,  "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_nw, "x":8,  "y":7,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_nw, "x":15, "y":0,  "wrap":False, "expect":0 },
+        { "alive_cells": alive_top_nw, "x":15, "y":7,  "wrap":False, "expect":0 },
+
+        { "alive_cells": alive_top_nw, "x":0,  "y":0,  "wrap":True, "expect":1 }, #356
+        { "alive_cells": alive_top_nw, "x":0,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_nw, "x":0,  "y":8,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_nw, "x":0,  "y":15, "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_nw, "x":7,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_nw, "x":7,  "y":8,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_nw, "x":7,  "y":15, "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_nw, "x":8,  "y":0,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_nw, "x":8,  "y":7,  "wrap":True, "expect":0 },
+        { "alive_cells": alive_top_nw, "x":15, "y":0,  "wrap":True, "expect":1 },
+        { "alive_cells": alive_top_nw, "x":15, "y":7,  "wrap":True, "expect":0 },
+
         ]
 
 def test_num_alive_neighbours ():
     global alive_cells
-    global wrapu
+    failures = 0
     #loop through a bunch of tests
-    for test in num_alive_tests:
+    for num, test in enumerate( num_alive_tests):
         alive_cells = test[ "alive_cells"]
-        wrap = test[ "wrap"]
-        count = num_alive_neighbours (test[ "x"], test[ "y"])
+        count = num_alive_neighbours (test[ "x"], test[ "y"], test[ "wrap"])
         #report if returned value not what was expected
         if count != test[ "expect"]:
-            #print ("Test failed, got %s, with %s" % ( count, "x:" + test) )
-            print ("Test failed, got %s, expected %s with x:%s y:%s wrap:%s" % ( count, test["expect"],  test["x"], test["y"], test["wrap"] ))
+            print ("Test %s failed, got %s, expected %s with x:%s y:%s wrap:%s" %
+                    ( num, count, test["expect"],  test["x"], test["y"], test["wrap"] ))
+            failures += 1
+    if failures == 0:
+        print ("Passed all tests")
+    else:
+        print ("Failed %s tests" % failures)
 
 #### FUNCTIONS ####
 
 # determine the number of alive neighbors
-def num_alive_neighbours(x, y):
+def num_alive_neighbours(x, y, wrap):
     num_neighbours = 0
+    tried = [(x,y)] # non-null to prevent wrap back to itself
     for x2 in [x-1, x, x+1]:
         for y2 in [y-1, y, y+1]:
+
             if (x2, y2) != (x, y):
                 neighbour = (x2, y2)
                 # Account for 3D nature of panels
-                if x2 == 8 and y2 >= 8:
-                    neighbour = (y2, 7)
-                elif y2 == 8 and x2 >= 8:
-                    neighbour = (7, x2)
-                if neighbour in alive_cells:
-                    num_neighbours += 1
+                if wrap:
+                    if x2 == -1:
+                        if y2 < 8:
+                            neighbour = (15, y2)
+                        else:
+                            neighbour = (y2, 0)
+                    elif x2 == 8 and y2 >= 8:
+                        neighbour = (y2, 7)
+                    elif x2 == 16:
+                        neighbour = (0, y2)
+                    elif y2 == -1:
+                        if x2 < 8:
+                            neighbour = (x2, 15)
+                        else:
+                            neighbour = (0, x2)
+                    elif y2 == 8 and x2 >= 8:
+                            neighbour = (7, x2)
+                    elif y2 == 16:
+                        neighbour = (x2, 0)
+                else:
+                    if x2 == 8 and y2 >= 8:
+                        neighbour = (y2, 7)
+                    elif y2 == 8 and x2 >= 8:
+                        neighbour = (7, x2)
+                if False: #debug == True
+                    print("num: x:%s, y:%s, x2:%s y2:%s neighbour:%s %s tried:%s" %
+                            (x, y, x2, y2, neighbour, neighbour in alive_cells, tried) )
+                if neighbour not in tried: # don't try same neighbor twice
+                    tried.append (neighbour)
+                    if neighbour in alive_cells:
+                        num_neighbours += 1
     return num_neighbours
 
 
@@ -76,8 +523,7 @@ allowed_loops = 3
 maximum_generations = 500
 base_saturation = 1
 base_luminance = 0.5
-wrap = False
-
+wrap = True
 
 #### CONSTANTS ####
 num_transitions = 5 # between state
@@ -171,7 +617,7 @@ while True:
             for y in range( 16):
                 if x < 8 or y < 8:
                     is_alive = (x, y) in alive_cells
-                    neighbours = num_alive_neighbours(x, y)
+                    neighbours = num_alive_neighbours(x, y, wrap)
 
                     if is_alive:
                         if ( neighbours == 2 or neighbours == 3):
@@ -194,4 +640,3 @@ while True:
         if fail_safe_count <= 0:
             print ("Fail safe triggered")
             is_looping = True
-
