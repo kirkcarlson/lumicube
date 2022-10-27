@@ -539,7 +539,6 @@ def get_hex_chars( string, index):
 
 # convert string to an array of alive cells xy pairs
 def str_to_alive( string):
-    print ("str_to_alive: %s" % string)
     alives = []
     checksum = 0
     # scan to start character
@@ -551,18 +550,17 @@ def str_to_alive( string):
     if index < len( string):
         for y in range (16):
             hex_string, index = get_hex_chars(string, index)
-            print ("hex_string:%s index:%s" % ( hex_string, index))
             if index > 0:
                 row = int( hex_string, 16)
-                checksum = checksum + row & 0xFF + (row >> 8) & 0xFF
+                checksum = checksum + (row & 0xFF) + ((row >> 8) & 0xFF)
                 for x in range (16):
                     if row & 1 << x:
                         alives.append( (x, y))
             else:
                 print ("***Encoding error in hex string %s" % string)
         check = string [index: index+2]
-        if checksum + int( check, 16) != 0:
-            print ("***checksum error in hex string %s" % string)
+        if (checksum + int( check, 16)) & 0xFF != 0:
+            print ("***checksum error in hex string %s, got %s" % (string, checksum))
     return alives
 
 
@@ -572,10 +570,12 @@ def str_to_alive( string):
 starting_live_ratio = 0.4
 guard_hue = 0.1 # portion of full circle
 allowed_loops = 3
-maximum_generations = 5#500 modified for testing
+maximum_generations = 500
 base_saturation = 1
 base_luminance = 0.5
 wrap = True
+record_seed = True
+record_end = True
 
 #### CONSTANTS ####
 num_transitions = 5 # between state
@@ -592,13 +592,22 @@ base_hue = 0
 num_generations = 0
 num_cells_start = 0
 num_cells_left = 0
-loop_length = 0
-past_loop_length = 0
+period = 0
+past_period = 0
 loop_count = 0
 while True:
     # loop initialization
-    if loop_length > 0:
-        print ("hue: %4.2f start cells %2s, generations: %3s, cells at end: %2s, loop length: %2s" % ( base_hue, num_cells_start, num_generations, num_cells_left, loop_length) )
+    if period > 0: # actually a holdover from the last pass
+        if num_cells_left == 0:
+            cause = "annihilation"
+        elif period == 1:
+            cause = "stability"
+        else:
+            cause = "oscillating period %s" % period
+        if record_end:
+            print ("end: %s" % alive_to_str( alive_cells))
+        print ("hue: %4.2f generations: %3s, start/end %3s/%2s, cause: %s" %
+                ( base_hue, num_generations, num_cells_start, num_cells_left, cause) )
     base_hue = (base_hue + guard_hue + ( 1 - 2 * guard_hue) * random.random() ) % 1
     phaseColors = [ hsv_colour( base_hue, base_saturation,       0   * base_luminance), # dead
                     hsv_colour( base_hue, base_saturation,       0.2 * base_luminance), # spark
@@ -626,11 +635,12 @@ while True:
                 column.append( dead)
         current_phases.append( column)
     num_cells_start = len( alive_cells)
-    print ("seed: %s"% alive_to_str( alive_cells))
+    if record_seed:
+        print ("seed: %s" % alive_to_str( alive_cells))
     if True: # debug is true
         dummy =  alive_to_str( alive_cells)
         dummy = str_to_alive( dummy)
-        if is_list_equal( alive_cells, dummy):
+        if not is_list_equal( alive_cells, dummy):
             print( "*** alive_to_str/str_to_alive conversion is not equal")
             print( alive_to_str( dummy))
 
@@ -638,7 +648,7 @@ while True:
     past_alives = []
     is_looping = False
     loop_count = 0
-    past_loop_length = 0
+    past_period = 0
     fail_safe_count = maximum_generations
     while not is_looping:
 
@@ -658,16 +668,15 @@ while True:
         # determine if pattern is looping (too much)
         for count, past_alive_cells in enumerate( past_alives):
             if is_list_equal( alive_cells, past_alive_cells): # seen this before?
-                loop_length = len( past_alives) - count
-                if past_loop_length == 0:
-                    past_loop_length = loop_length
+                period = len( past_alives) - count
+                if past_period == 0:
+                    past_period = period
                     loop_count = 1
-                elif loop_length == past_loop_length:
+                elif period == past_period:
                     loop_count += 1
                     if loop_count >= allowed_loops:
                         is_looping = True # now we've seen enough
-                        print ("end: %s"% alive_to_str( alive_cells))
-        if len( past_alives) == 0 or past_loop_length == 0: # first pass or no loop detected
+        if len( past_alives) == 0 or past_period == 0: # first pass or no loop detected
             past_alives.append( alive_cells)
             num_generations += 1
 
