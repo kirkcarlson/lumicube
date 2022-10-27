@@ -503,10 +503,10 @@ def is_list_equal( list1, list2):
     return True
 
 
-# generate string representing a state of alive cells
-def alive_to_str(alives):
-    string = ""
-    sum = 0
+# convert list of live cell xy pairs to a string
+def alive_to_str( alives):
+    string = ":" # start character
+    checksum = 0
     for y in range (16):
         row = 0
         for x in range (16):
@@ -517,16 +517,62 @@ def alive_to_str(alives):
             string += "%04X-" % row
         else:
             string += "%02X-" % row
-        sum += (row & 0xFF) + ((row >>8) & 0xFF) # sum over bytes
-    string += "%02X" % (-sum & 0xFF)
+        checksum += (row & 0xFF) + ((row >>8) & 0xFF) # sum over bytes
+    string += ("%02X" % (-checksum & 0xFF))
     return string
+
+
+# get hex chars from string
+hexchars = "01123456789abcdefABCDEF"
+
+def get_hex_chars( string, index):
+    scan_index = index
+    while string [scan_index] in hexchars:
+        scan_index += 1
+        if scan_index > len( string):
+            return (string, -1) # not found
+    if scan_index == index:
+        return (string, -1) # not found
+    else:
+        return( string[index:scan_index], scan_index + 1)
+
+
+# convert string to an array of alive cells xy pairs
+def str_to_alive( string):
+    print ("str_to_alive: %s" % string)
+    alives = []
+    checksum = 0
+    # scan to start character
+    index = 0
+    while string [index] != ":" and index < len( string):
+        index += 1
+    # for all 16 elements
+    index += 1
+    if index < len( string):
+        for y in range (16):
+            hex_string, index = get_hex_chars(string, index)
+            print ("hex_string:%s index:%s" % ( hex_string, index))
+            if index > 0:
+                row = int( hex_string, 16)
+                checksum = checksum + row & 0xFF + (row >> 8) & 0xFF
+                for x in range (16):
+                    if row & 1 << x:
+                        alives.append( (x, y))
+            else:
+                print ("***Encoding error in hex string %s" % string)
+        check = string [index: index+2]
+        if checksum + int( check, 16) != 0:
+            print ("***checksum error in hex string %s" % string)
+    return alives
+
+
 
 #### CONFIGURATION CONSTANTS ####            string += "%04X-" % row
 
 starting_live_ratio = 0.4
 guard_hue = 0.1 # portion of full circle
 allowed_loops = 3
-maximum_generations = 500
+maximum_generations = 5#500 modified for testing
 base_saturation = 1
 base_luminance = 0.5
 wrap = True
@@ -581,6 +627,12 @@ while True:
         current_phases.append( column)
     num_cells_start = len( alive_cells)
     print ("seed: %s"% alive_to_str( alive_cells))
+    if True: # debug is true
+        dummy =  alive_to_str( alive_cells)
+        dummy = str_to_alive( dummy)
+        if is_list_equal( alive_cells, dummy):
+            print( "*** alive_to_str/str_to_alive conversion is not equal")
+            print( alive_to_str( dummy))
 
     num_generations = 0
     past_alives = []
