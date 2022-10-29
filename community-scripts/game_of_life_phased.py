@@ -8,6 +8,7 @@
 
 #### IMPORTS ####
 import random
+import os
 
 #### UNIT TEST FUNCTION ####
 alive_top_vert = [(0,9), (0,10), (0,11), (7,9), (7,10), (7,11)]
@@ -542,15 +543,14 @@ def str_to_alive( string):
     alives = []
     checksum = 0
     # scan to start character
-    index = 0
-    while string [index] != ":" and index < len( string):
-        index += 1
-    # for all 16 elements
-    index += 1
-    if index < len( string):
+    inx = string.index(':')
+    if inx < 0:
+        return alives # null at this point
+    inx += 1
+    if inx < len( string):
         for y in range (16):
-            hex_string, index = get_hex_chars(string, index)
-            if index > 0:
+            hex_string, inx = get_hex_chars(string, inx)
+            if inx > 0:
                 row = int( hex_string, 16)
                 checksum = checksum + (row & 0xFF) + ((row >> 8) & 0xFF)
                 for x in range (16):
@@ -558,11 +558,22 @@ def str_to_alive( string):
                         alives.append( (x, y))
             else:
                 print ("***Encoding error in hex string %s" % string)
-        check = string [index: index+2]
+                return []
+        check = string [inx: inx+2]
         if (checksum + int( check, 16)) & 0xFF != 0:
             print ("***checksum error in hex string %s, got %s" % (string, checksum))
+            return []
     return alives
 
+
+# find last occurance of character in string
+def rindex( string, search, start=None):
+    if start is None:
+        start = len( string) - 1
+    for i in xrange(start, -1, -1):
+        if string[i] == search:
+            return i
+    return -1
 
 
 #### CONFIGURATION CONSTANTS ####            string += "%04X-" % row
@@ -576,6 +587,8 @@ base_luminance = 0.5
 wrap = True
 record_seed = True
 record_end = True
+record_file = "recordings" # name of file to save to, null to not save
+playback_file = "playback" # name of file containing playback strings
 
 #### CONSTANTS ####
 num_transitions = 5 # between state
@@ -595,6 +608,14 @@ num_cells_left = 0
 period = 0
 past_period = 0
 loop_count = 0
+
+# optionally open playback file
+if playback_file != "" and os.path.exists( playback_file):
+    in_file = open( playback_file, "r")
+    is_reading = True
+else:
+    is_reading = False
+
 while True:
     # loop initialization
     if period > 0: # actually a holdover from the last pass
@@ -604,9 +625,14 @@ while True:
             cause = "stability"
         else:
             cause = "oscillating period %s" % period
+        if record_file != "":
+            with open( record_file, 'a') as recording:
+                recording.write("end: %s\n" % alive_to_str( alive_cells))
+                recording.write("generations:%s, start:%s end:%s, cause: %s\n" %
+                    ( num_generations, num_cells_start, num_cells_left, cause) )
         if record_end:
             print ("end: %s" % alive_to_str( alive_cells))
-        print ("hue: %4.2f generations: %3s, start/end %3s/%2s, cause: %s" %
+        print ("hue: %4.2f generations: %3s, start/end: %3s/%2s, cause: %s" %
                 ( base_hue, num_generations, num_cells_start, num_cells_left, cause) )
     base_hue = (base_hue + guard_hue + ( 1 - 2 * guard_hue) * random.random() ) % 1
     phaseColors = [ hsv_colour( base_hue, base_saturation,       0   * base_luminance), # dead
@@ -625,16 +651,41 @@ while True:
     # seed the starting cells and build current_phases list of lists
     alive_cells = []
     current_phases = []
-    for x in range( 16):
-        column = []
-        for y in range( 16):
-            if (x < 8 or y < 8) and random.random() < starting_live_ratio:
-                alive_cells.append( (x,y))
-                column.append( spark)
+    if is_reading:
+        is_getting_line = True
+        is_reading = False # assume failure unless get a good line
+        while is_getting_line:
+            string = in_file.readline()
+            if string == "": # End Of File
+                is_getting_line = False
             else:
-                column.append( dead)
-        current_phases.append( column)
+                if string[:7] == "seed: :":
+                    alive_cells = str_to_alive( string[6:])
+                    if len( alive_cells) > 0:
+                        for x in range( 16):
+                            column = []
+                            for y in range( 16):
+                                if (x < 8 or y < 8) and (x,y) in alive_cells:
+                                    column.append( spark)
+                                else:
+                                    column.append( dead)
+                            current_phases.append( column)
+                        is_getting_line = False # got the line, move on
+                        is_reading = True # still reading the file
+    if not is_reading: # normal method and fallback
+        for x in range( 16):
+            column = []
+            for y in range( 16):
+                if (x < 8 or y < 8) and random.random() < starting_live_ratio:
+                    alive_cells.append( (x,y))
+                    column.append( spark)
+                else:
+                    column.append( dead)
+            current_phases.append( column)
     num_cells_start = len( alive_cells)
+    if record_file != "":
+        with open( record_file, 'a') as recording:
+            recording.write("seed: %s\n" % alive_to_str( alive_cells))
     if record_seed:
         print ("seed: %s" % alive_to_str( alive_cells))
     if True: # debug is true
@@ -658,6 +709,7 @@ while True:
             for x in range( 16):
                 for y in range( 16):
                     if x < 8 or y < 8:
+                        phase = 0
                         phase = current_phases[ x][ y]
                         leds[ x,y] = phaseColors [ phase]
                         if phase != dead and phase != alive:
