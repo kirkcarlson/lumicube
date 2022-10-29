@@ -576,11 +576,58 @@ def rindex( string, search, start=None):
     return -1
 
 
-#### CONFIGURATION CONSTANTS ####            string += "%04X-" % row
+# compute the phase colors using a color control list of dictionaries
+def compute_phase_colors ( color_controls, base_hue, base_saturation, base_luminance):
+    colors = []
+    for control in color_controls:
+        colors.append( hsv_colour(  (base_hue + control[ "hue_offset"]) % 1,
+                                    base_saturation * control[ "saturation_factor"],
+                                    base_luminance * control[ "luminance_factor"]))
+    return colors
+
+
+
+#### CONSTANTS ####
+num_transitions = 5 # between state
+num_phases = 2 * num_transitions
+dead = 0
+alive = num_transitions
+dying = alive + 1
+spark = dead + 1
+dead_is_black = [ # base color control
+      {"hue_offset":0, "saturation_factor":1, "luminance_factor":0  }, # dead
+      {"hue_offset":0, "saturation_factor":1, "luminance_factor":0.2}, # spark
+      {"hue_offset":0, "saturation_factor":1, "luminance_factor":0.4},
+      {"hue_offset":0, "saturation_factor":1, "luminance_factor":0.6},
+      {"hue_offset":0, "saturation_factor":1, "luminance_factor":0.8},
+      {"hue_offset":0, "saturation_factor":1, "luminance_factor":1  }, # alive
+      {"hue_offset":0, "saturation_factor":1, "luminance_factor":0.8}, # dying
+      {"hue_offset":0, "saturation_factor":1, "luminance_factor":0.6},
+      {"hue_offset":0, "saturation_factor":1, "luminance_factor":0.4},
+      {"hue_offset":0, "saturation_factor":1, "luminance_factor":0.2},
+    ]
+
+dead_is_compliment = [ # color control
+      {"hue_offset":0.5, "saturation_factor":1, "luminance_factor":0.5}, # dead
+      {"hue_offset":0.6, "saturation_factor":1, "luminance_factor":0.6}, # spark
+      {"hue_offset":0.7, "saturation_factor":1, "luminance_factor":0.7},
+      {"hue_offset":0.8, "saturation_factor":1, "luminance_factor":0.8},
+      {"hue_offset":0.9, "saturation_factor":1, "luminance_factor":0.9},
+      {"hue_offset":0.0, "saturation_factor":1, "luminance_factor":1  }, # alive
+      {"hue_offset":0.1, "saturation_factor":1, "luminance_factor":0.9}, # dying
+      {"hue_offset":0.2, "saturation_factor":1, "luminance_factor":0.8},
+      {"hue_offset":0.3, "saturation_factor":1, "luminance_factor":0.7},
+      {"hue_offset":0.4, "saturation_factor":1, "luminance_factor":0.6},
+    ]
+
+
+#### CONFIGURATION CONSTANTS ####
 
 starting_live_ratio = 0.4
 guard_hue = 0.1 # portion of full circle
-color_option = 1 # 0 dead is black, 1 dead is complimentary
+#color_controls = dead_is_black # basic
+color_controls = dead_is_compliment
+color_evolution = 0.01 # amount to change color per generation
 allowed_loops = 3
 maximum_generations = 500
 base_saturation = 1
@@ -591,15 +638,10 @@ record_end = True
 record_file = "recordings" # name of file to save to, null to not save
 playback_file = "playback" # name of file containing playback strings
 
-#### CONSTANTS ####
-num_transitions = 5 # between state
-num_phases = 2 * num_transitions
-dead = 0
-alive = num_transitions
-dying = alive + 1
-spark = dead + 1
 
 #### MAIN LOOP ####
+
+
 # VARIABLES
 test_num_alive_neighbours () # run unit tests first
 base_hue = 0
@@ -636,33 +678,7 @@ while True:
         print ("hue: %4.2f generations: %3s, start/end: %3s/%2s, cause: %s" %
                 ( base_hue, num_generations, num_cells_start, num_cells_left, cause) )
     base_hue = (base_hue + guard_hue + ( 1 - 2 * guard_hue) * random.random() ) % 1
-    if color_option == 1: # dead is complimentary
-        phaseColors = [ hsv_colour( (base_hue+0.5)%1, base_saturation, 0.5 * base_luminance), # dead
-                        hsv_colour( (base_hue+0.6)%1, base_saturation, 0.6 * base_luminance), # spark
-                        hsv_colour( (base_hue+0.7)%1, base_saturation, 0.7 * base_luminance),
-                        hsv_colour( (base_hue+0.8)%1, base_saturation, 0.8 * base_luminance),
-                        hsv_colour( (base_hue+0.9)%1, base_saturation, 0.9 * base_luminance),
-
-                        hsv_colour( (base_hue+0.0)%1, base_saturation, 1   * base_luminance), # alive
-                        hsv_colour( (base_hue+0.1)%1, base_saturation, 0.9 * base_luminance), # dying
-                        hsv_colour( (base_hue+0.2)%1, base_saturation, 0.8 * base_luminance),
-                        hsv_colour( (base_hue+0.3)%1, base_saturation, 0.7 * base_luminance),
-                        hsv_colour( (base_hue+0.4)%1, base_saturation, 0.6 * base_luminance)
-                    ]
-    else:
-        phaseColors = [ hsv_colour( base_hue, base_saturation, 0   * base_luminance), # dead
-                        hsv_colour( base_hue, base_saturation, 0.2 * base_luminance), # spark
-                        hsv_colour( base_hue, base_saturation, 0.4 * base_luminance),
-                        hsv_colour( base_hue, base_saturation, 0.6 * base_luminance),
-                        hsv_colour( base_hue, base_saturation, 0.8 * base_luminance),
-
-                        hsv_colour( base_hue, base_saturation, 1   * base_luminance), # alive
-                        hsv_colour( base_hue, base_saturation, 0.8 * base_luminance), # dying
-                        hsv_colour( base_hue, base_saturation, 0.6 * base_luminance),
-                        hsv_colour( base_hue, base_saturation, 0.4 * base_luminance),
-                        hsv_colour( base_hue, base_saturation, 0.2 * base_luminance)
-                    ]
-
+    phase_colors = compute_phase_colors( color_controls, base_hue, base_saturation, base_luminance)
 
     # seed the starting cells and build current_phases list of lists
     alive_cells = []
@@ -727,11 +743,14 @@ while True:
                     if x < 8 or y < 8:
                         phase = 0
                         phase = current_phases[ x][ y]
-                        leds[ x,y] = phaseColors [ phase]
+                        leds[ x,y] = phase_colors [ phase]
                         if phase != dead and phase != alive:
                             current_phases[ x][ y] = (phase + 1) % num_phases
             display.set_leds( leds)
             time.sleep( 0.2)
+        if color_evolution > 0:
+            base_hue = (base_hue + color_evolution) % 1
+            phase_colors = compute_phase_colors( color_controls, base_hue, base_saturation, base_luminance)
 
         # determine if pattern is looping (too much)
         for count, past_alive_cells in enumerate( past_alives):
