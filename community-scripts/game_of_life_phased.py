@@ -580,6 +580,7 @@ def rindex( string, search, start=None):
 
 starting_live_ratio = 0.4
 guard_hue = 0.1 # portion of full circle
+color_option = 1 # 0 dead is black, 1 dead is complimentary
 allowed_loops = 3
 maximum_generations = 500
 base_saturation = 1
@@ -635,18 +636,33 @@ while True:
         print ("hue: %4.2f generations: %3s, start/end: %3s/%2s, cause: %s" %
                 ( base_hue, num_generations, num_cells_start, num_cells_left, cause) )
     base_hue = (base_hue + guard_hue + ( 1 - 2 * guard_hue) * random.random() ) % 1
-    phaseColors = [ hsv_colour( base_hue, base_saturation,       0   * base_luminance), # dead
-                    hsv_colour( base_hue, base_saturation,       0.2 * base_luminance), # spark
-                    hsv_colour( base_hue, base_saturation,       0.4 * base_luminance),
-                    hsv_colour( base_hue, base_saturation,       0.6 * base_luminance),
-                    hsv_colour( base_hue, base_saturation,       0.8 * base_luminance),
+    if color_option == 1: # dead is complimentary
+        phaseColors = [ hsv_colour( (base_hue+0.5)%1, base_saturation, 0.5 * base_luminance), # dead
+                        hsv_colour( (base_hue+0.6)%1, base_saturation, 0.6 * base_luminance), # spark
+                        hsv_colour( (base_hue+0.7)%1, base_saturation, 0.7 * base_luminance),
+                        hsv_colour( (base_hue+0.8)%1, base_saturation, 0.8 * base_luminance),
+                        hsv_colour( (base_hue+0.9)%1, base_saturation, 0.9 * base_luminance),
 
-                    hsv_colour( base_hue, base_saturation,       1   * base_luminance), # alive
-                    hsv_colour( base_hue, base_saturation,       0.8 * base_luminance), # dying
-                    hsv_colour( base_hue, base_saturation,       0.6 * base_luminance),
-                    hsv_colour( base_hue, base_saturation,       0.4 * base_luminance),
-                    hsv_colour( base_hue, base_saturation,       0.2 * base_luminance)
-                  ]
+                        hsv_colour( (base_hue+0.0)%1, base_saturation, 1   * base_luminance), # alive
+                        hsv_colour( (base_hue+0.1)%1, base_saturation, 0.9 * base_luminance), # dying
+                        hsv_colour( (base_hue+0.2)%1, base_saturation, 0.8 * base_luminance),
+                        hsv_colour( (base_hue+0.3)%1, base_saturation, 0.7 * base_luminance),
+                        hsv_colour( (base_hue+0.4)%1, base_saturation, 0.6 * base_luminance)
+                    ]
+    else:
+        phaseColors = [ hsv_colour( base_hue, base_saturation, 0   * base_luminance), # dead
+                        hsv_colour( base_hue, base_saturation, 0.2 * base_luminance), # spark
+                        hsv_colour( base_hue, base_saturation, 0.4 * base_luminance),
+                        hsv_colour( base_hue, base_saturation, 0.6 * base_luminance),
+                        hsv_colour( base_hue, base_saturation, 0.8 * base_luminance),
+
+                        hsv_colour( base_hue, base_saturation, 1   * base_luminance), # alive
+                        hsv_colour( base_hue, base_saturation, 0.8 * base_luminance), # dying
+                        hsv_colour( base_hue, base_saturation, 0.6 * base_luminance),
+                        hsv_colour( base_hue, base_saturation, 0.4 * base_luminance),
+                        hsv_colour( base_hue, base_saturation, 0.2 * base_luminance)
+                    ]
+
 
     # seed the starting cells and build current_phases list of lists
     alive_cells = []
